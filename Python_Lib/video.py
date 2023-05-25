@@ -9,9 +9,11 @@ import time,threading
 try:
     from Python_Lib import Image
     from Python_Lib import xlxs
+    from Python_Lib import reject_xlxs
 except:
     import Image
     import xlxs
+    import reject_xlxs
 
 img_camera = []
 
@@ -43,7 +45,7 @@ class Camera:
 class ThreadCamera(QThread):
     
     updateFrame = pyqtSignal(QImage)
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     def __init__(self, parent=None):
         QThread.__init__(self, parent)
     
@@ -77,6 +79,11 @@ class ImageProvider(QQuickImageProvider):
         self.status_cam = False
         self.run_card = [""]
         self.last_run_card = []
+        self.run_card_time = []
+
+        self.reject_run_card = [""]
+        self.reject_last_run_card =[]
+        self.reject_run_card_time = []
 
     def requestImage(self, id, size):
         if self.image:
@@ -93,55 +100,94 @@ class ImageProvider(QQuickImageProvider):
                 for i in range(len(self.run_card)):
                     try:
                         if self.run_card[i] == self.last_run_card[i]:
-                            # print("OK")
                             pass
                     except:
                         self.last_run_card.append(self.run_card[i])
                         print("add",self.last_run_card)
             x=""
-            for i in self.last_run_card:
-                x = x+i+" " 
-            return x
-            # return str(self.on)+" "+self.run_card[-1]
-        else:return "0"
-        # if self.status_cam:
-        #     return str(self.on)+" "+self.run_card[-1]
-        # else:return "0 0"
+            t = ""
+            for i in self.run_card:
+                x = x+i+"/"
+            
+            for i in self.run_card_time:
+                t = t+i+""
 
+            return x+"*"+t
+        else:return "0"
+
+    @pyqtSlot(result=str)
+    def get_reject_runcard_on(self):
+        if self.status_cam:
+            if self.reject_run_card != self.reject_last_run_card:
+                for i in range(len(self.reject_run_card)):
+                    try:
+                        if self.reject_run_card[i] == self.reject_last_run_card[i]:
+                            pass
+                    except:
+                        self.reject_last_run_card.append(self.reject_run_card[i])
+                        print("add",self.reject_last_run_card)
+            x=""
+            t = ""
+            for i in self.reject_run_card:
+                x = x+i+"/"
+            
+            for i in self.reject_run_card_time:
+                t = t+i+""
+            # print(x+"*"+t)
+            return x+"*"+t
+        else:return "0"
+
+    Excel = xlxs.excel("accept")
+    reject_Excel = reject_xlxs.excel()
+    reject_on,accept_on =0,0
+
+    last_re_ac = "00"
+    v=0
+    @pyqtSlot(result=str)
+    def get_ac_re(self):
+        return self.last_re_ac
     
-    Excel = xlxs.excel()
+    last_time = int(time.time())
     @pyqtSlot()
     def update_image(self):
-        # print(time.time()-self.x)
-        # self.x=time.time()
         if self.status_cam:
-            # try:
-                # _,color_frame = self.cp.read()
-                color_frame = img_camera
+                try:
+                    color_frame = img_camera
 
-                color_frame,rrr=Image.image(color_frame)
-                self.run_card = self.Excel.xlxs_write(rrr)
+                    color_frame,rrr=Image.image(color_frame)
+                    self.reject_run_card,self.reject_run_card_time,acc,self.reject_on = self.reject_Excel.xlxs_write(rrr)
+                    # print(acc)
+                    if acc == "accept":
+                        self.run_card,self.run_card_time,self.accept_on = self.Excel.xlxs_write(rrr)
+                    # if self.accept_on == 1 or self.reject_on == 1:
+                        # print(self.reject_on,self.accept_on)
+                    if self.reject_on == 1 or self.accept_on == 1:
+                        self.last_re_ac = str(self.reject_on)+str(self.accept_on)
+                        self.v=0
+                        self.last_time = int(time.time())
+                    if self.v==0:
+                        if (int(time.time()) - self.last_time) > 25 :
+                            self.last_time = int(time.time())
+                            self.v=1
+                            self.last_re_ac ="00"
 
-
-                # if self.run_card[-1] != self.last_run_card[-1]:
-                #     print("ndhjwabdjk")
-                #     self.last_run_card = self.run_card
                     
-                # if (rrr in self.run_card) == False and rrr != "0":
-                #     if self.run_card != self.last_run_card:
-                #         self.run_card = xlxs.xlxs_data(rrr)
-                #         print(self.run_card)
+                    # self.v+=1
+                    # if self.v >= 100:
+                        # self.v=100
+                        # self.last_re_ac ="00"
+                    # print(self.v)
 
-                # print("runcard ",runcard)
 
-                img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format.Format_BGR888)
-                self.imageChanged.emit(img)
-                # img = QImage(600, 500, QImage.Format.Format_RGBA8888)
-                # img.fill(Qt.GlobalColor.red)
-                # self.imageChanged.emit(img)
-               
+                    img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format.Format_BGR888)
+                    self.imageChanged.emit(img)
+                    # img = QImage(600, 500, QImage.Format.Format_RGBA8888)
+                    # img.fill(Qt.GlobalColor.red)
+                    # self.imageChanged.emit(img)
+                
 
-                self.image = img
+                    self.image = img
+                except:pass
             # except:
                 # self.cam.exec()
         else:
@@ -196,7 +242,7 @@ class ImageProvider(QQuickImageProvider):
 
     @pyqtSlot()
     def killThread(self):
-        
+
         try:
             self.x.stop()
             self.cam.exec()

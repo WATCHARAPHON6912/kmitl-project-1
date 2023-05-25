@@ -198,6 +198,7 @@ Rectangle{
 
         onTriggered: {
             f_s_r = python.get_plc_loop()
+            python.get_m1_loop()
         }
     }
 

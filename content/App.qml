@@ -43,12 +43,17 @@ Window {
     property double app_joint2: 90
     property double app_joint3: 90
     property double app_joint4: 90
+    property double show_joint1: 230
+    property double show_joint2: 0
+    property double show_joint3: 0
+    property double show_joint4: 0
     property int size: 13
     property int button_h: 70
     property int button_w: 70
     property bool status_m1: false
     property bool status_plc: false
     property bool status_camera: false
+    property bool con: false
 
 
 
@@ -69,7 +74,7 @@ Window {
             y: 116
             width: 248
             height: 48
-            text: "Dark Mode"
+            text: mode.checked ? "Light Mode":"Dark Mode"
         }
         Switch {
             id :mode_j
@@ -86,7 +91,7 @@ Window {
             y: 552
             width: 202
             height: 31
-            text: "j1 = "+app_joint1
+            text: "j1 = "+show_joint1
             color:mode.checked ?  "#ffffff":"#000000"
             font.pixelSize: 25
         }
@@ -96,7 +101,7 @@ Window {
             y: 582
             width: 202
             height: 37
-            text: "j2 = "+app_joint2
+            text: "j2 = "+show_joint2
             color:mode.checked ?  "#ffffff":"#000000"
             font.pixelSize: 25
         }
@@ -108,7 +113,7 @@ Window {
             width: 202
             height: 43
             color: mode.checked ?  "#ffffff":"#000000"
-            text: "j3 = "+app_joint3
+            text: "j3 = "+show_joint3
             font.pixelSize: 25
         }
         Text {
@@ -118,14 +123,14 @@ Window {
             width: 202
             height: 43
             color: mode.checked ?  "#ffffff":"#000000"
-            text: "j4 = "+app_joint4
+            text: "j4 = "+show_joint4
             font.pixelSize: 25
             
         }
 
         Button {
             id: button_j1_add
-            enabled: status_m1
+            enabled: con
             x: 62
             y: 484
             width: button_w
@@ -149,7 +154,7 @@ Window {
 
         Button {
             id: button_j1_sub
-            enabled: status_m1
+            enabled: con
             x: 62
             y: 553
             width: button_w
@@ -173,7 +178,7 @@ Window {
 
         Button {
             id: button_j2_add
-            enabled: status_m1
+            enabled: con
             x: 0
             y: 518
             width: button_w
@@ -197,7 +202,7 @@ Window {
 
         Button {
             id: button_j2_sub
-            enabled: status_m1
+            enabled: con
             x: 125
             y: 518
             width: button_w
@@ -221,7 +226,7 @@ Window {
 
         Button {
             id: button_j3_add
-            enabled: status_m1
+            enabled: con
             x: 62
             y: 618
             width: button_w
@@ -245,7 +250,7 @@ Window {
 
         Button {
             id: button_j3_sub
-            enabled: status_m1
+            enabled: con
             x: 62
             y: 687
             width: button_w
@@ -269,7 +274,7 @@ Window {
 
         Button {
             id: button_j4_add
-            enabled: status_m1
+            enabled: con
             x: 0
             y: 651
             width: button_w
@@ -294,7 +299,7 @@ Window {
 
         Button {
             id: button_j4_sub
-            enabled: status_m1
+            enabled: con
             x: 125
             y: 652
             width: button_w
@@ -349,9 +354,18 @@ Window {
                 target: myImageProvider
 
                 function onImageChanged(image) {
-//                    console.log("emit")
+                    //                    console.log("emit")
                     feedImage.reloadImage()
                 }
+        }
+
+            Switch {
+                id: mode_m1
+                x: 213
+                y: 116
+                width: 248
+                height: 48
+                text:mode_m1.checked ? "Manual":"Auto"
             }
     }
 
@@ -363,22 +377,15 @@ Window {
     Show_number{
         mode_color:  mode.checked ? "#3e6869":"#80D8EE"
         text_color:  mode.checked ? "#ff0000":"000000"
-
     }
     Plc_control{
         text_color: mode.checked ? "#ffffff":"000000"
 
     }
-    Button {
-        id: button
-        x: 243
-        y: 446
-        width: 134
-        height: 56
-        text: qsTr("Button")
-        onClicked: stringListModel.addString("hh")
-    }
+    function map(x, in_min, in_max, out_min, out_max){
 
+            return ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min).toFixed(2);
+        }
     Timer {
         interval: 25; running: true; repeat: true
 
@@ -388,9 +395,24 @@ Window {
         app_joint3 = python.joint3_loop()
         app_joint4 = python.joint4_loop()
 
+        show_joint1 = map(app_joint1,100,400,15,230)
+        show_joint2 = map(app_joint2,0,180,-80,90)
+        show_joint3 = map(app_joint3,-50,230,-130,130)
+        show_joint4 = map(app_joint4,-50,230,-130,130)
         status_m1 = python.return_m1()
+
+//        console.log()
+        if(status_m1 == true && (mode_m1.checked ? "Auto":"Manual")==="Manual"){
+            con = true
+        }else{
+            con = false
+        }
+        // console.log(con)
+        python.mode_m1(con)
+
         status_plc = python.return_plc()
         status_camera =python.return_camera()
+//        python.mode_m1(mode_m1.clicked ? "0":"1")
 
         if (button_j1_add.down){python.send(mode_j.checked ? "+X":"+J1")}
         if (button_j1_sub.down){python.send(mode_j.checked ? "-X":"-J1")}
@@ -401,6 +423,8 @@ Window {
         if (button_j3_sub.down){python.send(mode_j.checked ? "-Z":"-J3")}
         if (button_j4_add.down){python.send(mode_j.checked ? "+R":"+J4")}
         if (button_j4_sub.down){python.send(mode_j.checked ? "-R":"-J4")}
+
+
 
         }
     }

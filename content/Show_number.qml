@@ -138,11 +138,14 @@ Rectangle{
     Timer {
         interval: 1; running: true; repeat: true
         onTriggered: {
+            //console.log(myImageProvider.get_runcard_on())
+            stringListModel.addString(myImageProvider.get_runcard_on())
+            //console.log(myImageProvider.get_reject_runcard_on())
+            stringListModel1.addString(myImageProvider.get_reject_runcard_on())
 
-                stringListModel.addString(myImageProvider.get_runcard_on())
-//                console.log(sp)
-
+            python.send_re_ac(myImageProvider.get_ac_re())
         }
+
     }
 
 

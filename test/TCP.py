@@ -11,9 +11,6 @@ class TCP():
 
     def cl_recv(self):
         data = self.client_socket.recv(1024).decode()  
-        # print(self.client_socket.getsockname())
-        if data == "8":
-            data=None
         return data
     def cl_close(self):
         self.client_socket.close()
@@ -43,18 +40,14 @@ class TCP():
         self.conn.close()
 
 if __name__ == '__main__':
-    import time
     s = TCP()
-    s.init_cl("192.168.31.164",8080)
-    # while 1:
-    #     s.cl_send("ON")
-    #     time.sleep(1)
-    #     s.cl_send("O")
-    #     time.sleep(1)
-    
-    # con = ""
+    s.init_sv("192.168.229.171",8080)
+    print(s.sv_get_getsockname())
     while 1:
-        print(s.cl_recv(),s.cl_get_getsockname())
-    
-    # # print("break",con)
-    s.cl_close()
+        x = s.sv_recv()
+        if x != "":
+            print(x)
+    s.sv_close()
+        # s.sv_send("OK")
+    # print("break",con)
+        

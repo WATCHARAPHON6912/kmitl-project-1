@@ -3,7 +3,7 @@ import QtQuick3D
 
 Node {
     id: rootNode
-    property double robot_joint1: 400
+    property double robot_joint1: 100
     property double robot_joint2: 90
     property double robot_joint3: 90
     property int scale_x: 1
