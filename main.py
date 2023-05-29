@@ -52,26 +52,41 @@ class Main(QObject):
     @pyqtSlot(bool)
     def mode_m1(self,mode):
         move_reject = [
-                [400,0,200],
-                [147 ,-333, 200],
-                [147, -333, 124],
-                [147, -333, 200],
-                [201 ,313, 200],
-                [201 ,313, 128]
+                [250,7,200],
+                [376,-93,200],
+                [376,-93,200],
+                [376,-93,134],
+
+                [376,-93,200],
+                [194,-181,200],
+                [194,-181,134],
+
+                [194,-181,200],
+                [250,7,200],
                 ]
         move_accep = [
-                [400,0,200],
-                [147 ,-333, 200],
-                [147, -333, 124],
-                [147, -333, 200],
-                [400,0,200],
-                [400 ,0, 128]
+                [250,7,200],
+                [376,-93,200],
+                [376,-93,200],
+                [376,-93,134],
+
+                [376,-93,200],
+                [161,-335,200],
+                [161,-335,86],
+
+                [161,-335,200],
+                [250,7,200],
+  
                 ]
 
         if mode != self.m1_mode:
             self.m1_mode = mode
             # print(self.i)
         if mode == False:
+            try:
+                if self.data_plc[2] == 1:
+                    self.modbus.write(0,0)
+            except:pass
             print(self.re_ac)
             if self.re_ac == "01":
                 
@@ -81,10 +96,15 @@ class Main(QObject):
                     try:
                         if self.i1==3:
                             self.IO1 = "0"
-                        if self.i1==(len(move_accep)-1):
+                        if self.i1== 6:
                             self.IO1 = "1"
+                        if self.i1== 8:
+                            self.modbus.write(0,1)
+                            
+                            # self.modbus.write(0,1)
                         time.sleep(0.1)
                         self.m1.cl_send(f"ptp {move_accep[self.i1][0]} {move_accep[self.i1][1]} {move_accep[self.i1][2]} {self.IO1}")
+
                         
                     
                     except:pass
@@ -97,8 +117,14 @@ class Main(QObject):
                     try:
                         if self.i==3:
                             self.IO = "0"
-                        if self.i==(len(move_reject)-1):
+                            
+                        if self.i==6:
                             self.IO = "1"
+                            
+                        if self.i==7:self.modbus.write(1,1)
+                        if self.i == 8:
+                            self.modbus.write(1,0)
+                            self.modbus.write(0,1)
                         self.m1.cl_send(f"ptp {move_reject[self.i][0]} {move_reject[self.i][1]} {move_reject[self.i][2]} {self.IO}")
                     except:pass
                     self.i+=1
@@ -162,15 +188,21 @@ class Main(QObject):
                 # self.m_1_on = False
                 # self.m_1 = 1
                 # self.con_m1 = False
-                
 
+    @pyqtSlot(result=str)
+    def get_senser(self):
+        if self.con_plc:
+            return str(self.data_plc[2])
+        return "100"
+
+    
     @pyqtSlot(result=str)
     def get_plc_loop(self):
         if self.con_plc:
             
             try:
-                re = self.modbus.read(0,2)
-                return str(re[0])+" "+str(re[1])
+                self.data_plc = self.modbus.read(0,3)
+                return str(self.data_plc[0])+" "+str(self.data_plc[1])
             except:pass
     
     @pyqtSlot(str)
@@ -188,7 +220,7 @@ class Main(QObject):
         
         if name[0] == "+" or name[0] == "-":
             self.m1.cl_send(name)
-            print(name)
+            # print(name)
         if self._name[0] == "camera_set" and self._name[1] == "1":self.con_camera = True
         elif self._name[0] == "camera_set" and self._name[1] == "0":self.con_camera =False
         elif self._name[0] == "camera":self.con_camera = not self.con_camera

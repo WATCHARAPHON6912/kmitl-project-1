@@ -147,36 +147,44 @@ class ImageProvider(QQuickImageProvider):
     def get_ac_re(self):
         return self.last_re_ac
     
+    senser = 1
+    @pyqtSlot(str)
+    def get_plc(self,Senser):
+        self.senser = Senser
+    
     last_time = int(time.time())
+    
     @pyqtSlot()
     def update_image(self):
         if self.status_cam:
                 try:
                     color_frame = img_camera
-
-                    color_frame,rrr=Image.image(color_frame)
-                    self.reject_run_card,self.reject_run_card_time,acc,self.reject_on = self.reject_Excel.xlxs_write(rrr)
-                    # print(acc)
-                    if acc == "accept":
-                        self.run_card,self.run_card_time,self.accept_on = self.Excel.xlxs_write(rrr)
-                    # if self.accept_on == 1 or self.reject_on == 1:
-                        # print(self.reject_on,self.accept_on)
-                    if self.reject_on == 1 or self.accept_on == 1:
-                        self.last_re_ac = str(self.reject_on)+str(self.accept_on)
-                        self.v=0
-                        self.last_time = int(time.time())
+                    # print(self.senser)
+                    # self.senser = "1"
+                    if self.senser == "1":
+                        color_frame,rrr=Image.image(color_frame)
+                        self.reject_run_card,self.reject_run_card_time,acc,self.reject_on = self.reject_Excel.xlxs_write(rrr)
+                        # print(acc)
+                        if acc == "accept":
+                            self.run_card,self.run_card_time,self.accept_on = self.Excel.xlxs_write(rrr)
+                        # if self.accept_on == 1 or self.reject_on == 1:
+                            # print(self.reject_on,self.accept_on)
+                        if self.reject_on == 1 or self.accept_on == 1:
+                            self.last_re_ac = str(self.reject_on)+str(self.accept_on)
+                            self.v=0
+                            self.last_time = int(time.time())
                     if self.v==0:
-                        if (int(time.time()) - self.last_time) > 25 :
+                        if (int(time.time()) - self.last_time) > 35 :
                             self.last_time = int(time.time())
                             self.v=1
                             self.last_re_ac ="00"
 
-                    
-                    # self.v+=1
-                    # if self.v >= 100:
-                        # self.v=100
-                        # self.last_re_ac ="00"
-                    # print(self.v)
+                        
+                        # self.v+=1
+                        # if self.v >= 100:
+                            # self.v=100
+                            # self.last_re_ac ="00"
+                        # print(self.v)
 
 
                     img = QImage(color_frame.data, color_frame.shape[1], color_frame.shape[0], QImage.Format.Format_BGR888)

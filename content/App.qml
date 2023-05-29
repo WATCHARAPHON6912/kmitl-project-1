@@ -7,8 +7,8 @@ import QtQuick.Controls 6.4
 import "../imports/UntitledProject"
 
 
-//ApplicationWindow {
-Window {
+ApplicationWindow {
+// Window {
     id:win
     width: 1530
     height: 780
@@ -16,21 +16,21 @@ Window {
     property  color button_text_color: "#000000"
 
 
-//    onClosing: {
+   onClosing: {
 
-//        close.accepted = closing
-//        onTriggered:{
-//            if(status_m1 === false && status_plc===false && status_camera === false){
-//                closing = true
-//                win.close()
-//            }else{
-//                myImageProvider.no_exit()
-//            }
+       close.accepted = closing
+       onTriggered:{
+           if(status_m1 === false && status_plc===false && status_camera === false){
+               closing = true
+               win.close()
+           }else{
+               myImageProvider.no_exit()
+           }
 
 
-//        }
+       }
 
-//    }
+   }
 
 
 //    width: 500
@@ -38,7 +38,7 @@ Window {
 
 
     visible: true
-    title: "Project"
+    title: ""
     property double app_joint1: 400
     property double app_joint2: 90
     property double app_joint3: 90

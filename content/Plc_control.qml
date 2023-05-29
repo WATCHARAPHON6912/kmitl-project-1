@@ -199,6 +199,10 @@ Rectangle{
         onTriggered: {
             f_s_r = python.get_plc_loop()
             python.get_m1_loop()
+
+            //python.get_senser()
+            myImageProvider.get_plc(python.get_senser())
+
         }
     }
 

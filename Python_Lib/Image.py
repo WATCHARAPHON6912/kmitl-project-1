@@ -25,9 +25,8 @@ def barcode(img):
                     retval, decoded_info, decoded_type, points = bd.detectAndDecode(img)
                     img = cv2.polylines(img, points.astype(int), True, (0, 255, 0), 3)
                     for s, p in zip(decoded_info, points):
-                              img = cv2.putText(img, s, p[1].astype(int),
-                                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-                    return img,s
+                              img = cv2.putText(img, s[:-1], p[1].astype(int),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+                    return img,s[:-1]
           except:return img,'0'
 if __name__ == "__main__":
           cap = cv2.VideoCapture(1)

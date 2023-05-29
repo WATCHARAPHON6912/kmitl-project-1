@@ -33,7 +33,7 @@ Rectangle{
                 y: 0
                 width: 120
                 height: 22
-                text: qsTr("192.168.31.171")
+                text: qsTr("192.168.1.69")
 //                text: qsTr(status_m1)
                 color: color_text
                 font.pixelSize: text_size
@@ -135,7 +135,7 @@ Rectangle{
                 y: 0
                 width: 128
                 height: 24
-                text: qsTr("192.168.31.171")
+                text: qsTr("192.168.1.126")
                 //        color:color_text
                 color: color_text
                 font.pixelSize: text_size
@@ -236,7 +236,7 @@ Rectangle{
                 y: 0
                 width: 179
                 height: 24
-                text: qsTr("2")
+                text: qsTr("3")
                 //        color:color_text
                 color: color_text
                 font.pixelSize: text_size

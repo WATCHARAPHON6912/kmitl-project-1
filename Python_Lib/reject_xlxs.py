@@ -95,7 +95,9 @@ class excel:
         wb.close()
 
         return self.reject_A,self.reject_B,self.reject_C
+        
     
+         
     date = []
     def xlxs_write(self,runcard):
         date = datetime.datetime.now()
